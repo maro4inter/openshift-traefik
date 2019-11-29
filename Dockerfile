@@ -1,7 +1,7 @@
 FROM alpine:3.10
 
 # Add user 
-RUN adduser -D mar4inter
+RUN adduser -D mar4inter -u 1227 -g 1227
 
 RUN apk --no-cache add ca-certificates tzdata
 RUN set -ex; \
@@ -20,8 +20,10 @@ COPY entrypoint.sh /
 #EXPOSE 80
 EXPOSE 8080 8443 8081
 
+
+
 # Switch to the mar4inter user (non root)
-USER mar4inter
+USER 1227
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["traefik"]
