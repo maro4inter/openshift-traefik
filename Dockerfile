@@ -1,9 +1,10 @@
 FROM alpine:3.10
 
 # Add user 
-RUN adduser -D mar4inter -u 1227 -g 1227
+##RUN adduser -D mar4inter -u 1227 -g 1227
 
 RUN apk --no-cache add ca-certificates tzdata
+
 RUN set -ex; \
 	apkArch="$(apk --print-arch)"; \
 	case "$apkArch" in \
@@ -16,14 +17,17 @@ RUN set -ex; \
 	tar xzvf /tmp/traefik.tar.gz -C /usr/local/bin traefik; \
 	rm -f /tmp/traefik.tar.gz; \
 	chmod +x /usr/local/bin/traefik
+	
 COPY entrypoint.sh /
+
 #EXPOSE 80
 EXPOSE 8080 8443 8081
 
 
 
 # Switch to the mar4inter user (non root)
-USER 1227
+##USER 1227
+USER 1001
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["traefik"]
