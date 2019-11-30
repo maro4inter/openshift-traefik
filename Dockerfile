@@ -17,6 +17,10 @@ RUN set -ex; \
 	
 COPY entrypoint.sh /entrypoint.sh
 
+RUN set -ex; \
+	chmod +x /entrypoint.sh ; \
+	chown 1001:1001 entrypoint.sh
+
 #EXPOSE 80
 EXPOSE 8080 8443 8081
 
@@ -24,9 +28,6 @@ EXPOSE 8080 8443 8081
 
 # Switch to the non root user
 USER 1001
-RUN set -ex; \
-	chmod +x /entrypoint.sh ; \
-	chown 1001:1001 entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["traefik"]
