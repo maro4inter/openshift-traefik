@@ -1,8 +1,5 @@
 FROM alpine:3.10
 
-# Add user 
-##RUN adduser -D mar4inter -u 1227 -g 1227
-
 RUN apk --no-cache add ca-certificates tzdata
 
 RUN set -ex; \
@@ -25,11 +22,11 @@ EXPOSE 8080 8443 8081
 
 
 
-# Switch to the mar4inter user (non root)
-##USER 1227
+# Switch to the non root user
 USER 1001
-#RUN ["chmod", "+x", "/entrypoint.sh"]
-RUN ["chown", "1001:1001", "/entrypoint.sh"]
+RUN set -ex; \
+	chmod +x /entrypoint.sh ; \
+	chown 1001:1001 entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["traefik"]
