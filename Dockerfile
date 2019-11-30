@@ -28,7 +28,7 @@ EXPOSE 8080 8443 8081
 # Switch to the mar4inter user (non root)
 ##USER 1227
 USER 1001
-RUN ["chmod", "+x", "/entrypoint.sh"]
+#RUN ["chmod", "+x", "/entrypoint.sh"]
 RUN ["chown", "1001:1001", "/entrypoint.sh"]
 
 ENTRYPOINT ["/entrypoint.sh"]
