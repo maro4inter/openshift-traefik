@@ -14,10 +14,10 @@ COPY entrypoint.sh /
 RUN set -ex; \
 	chmod +x /entrypoint.sh ; \
 	chown 1001:1001 entrypoint.sh
-EXPOSE 80
+EXPOSE 8080 8081 8443
 USER 1001
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["traefik"]
+#CMD ["traefik"]
 
 # Metadata
 LABEL org.opencontainers.image.vendor="Containous" \
