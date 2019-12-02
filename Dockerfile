@@ -17,7 +17,8 @@ RUN set -ex; \
 	
 USER 1001
 EXPOSE 8080 8081 8443
-ENTRYPOINT ["/entrypoint.sh"]
+
+#ENTRYPOINT ["/entrypoint.sh"]
 CMD ["traefik"]
 
 # Metadata
