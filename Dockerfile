@@ -15,7 +15,7 @@ RUN set -ex; \
 	rm -f /tmp/traefik.tar.gz; \
 	chmod +x /usr/local/bin/traefik
 	
-COPY entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /
 
 RUN set -ex; \
 	chmod +x /entrypoint.sh ; \
