@@ -23,7 +23,7 @@ EXPOSE 8080 8443 8081
 
 USER 1001
 
-ENTRYPOINT ["/entrypoint.sh"]
+#ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/local/bin/traefik","--configfile /etc/traefik/traefik.toml"]
 
 # Metadata
