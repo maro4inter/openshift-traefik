@@ -19,14 +19,13 @@ RUN set -ex; \
 	chmod +x /entrypoint.sh ; \
 	chown 1001:1001 entrypoint.sh
 
-VOLUME /etc/traefik /etc/letsencrypt
-
 EXPOSE 8080 8443 8081
 
 USER 1001
 
-#ENTRYPOINT ["/entrypoint.sh"]
-CMD ["traefik","--configfile /etc/traefik/traefik.toml"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["traefik"]
+#CMD ["traefik","--configfile /etc/traefik/traefik.toml"]
 
 # Metadata
 LABEL org.opencontainers.image.vendor="Containous" \
