@@ -12,13 +12,14 @@ RUN set -ex; \
 	chmod +x /usr/local/bin/traefik
 
 USER 1001
+VOLUME /etc/traefik /etc/letsencrypt
 COPY entrypoint.sh /
-#RUN set -ex; \
-#	chmod +x /entrypoint.sh ; \
-#	chown 1001:1001 entrypoint.sh
+RUN set -ex; \
+	chmod +x /entrypoint.sh ; \
+	chown 1001:1001 entrypoint.sh
 EXPOSE 8080 8081 8443
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["traefik","--defaultentrypoints=http,https","--entryPoints='Name:http Address::8080'","--entryPoints='Name:https Address::8443 TLS'","--entrypoints.web.address=:8081"]
+CMD ["/usr/local/bin/traefik","--configfile /etc/traefik/traefik.toml"]
 
 # Metadata
 LABEL org.opencontainers.image.vendor="Containous" \
