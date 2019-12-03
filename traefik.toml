@@ -1,17 +1,31 @@
-defaultEntryPoints = ["http", "https"]
-[web]
-address = ":8081"
+defaultEntryPoints = ["https","http"]
+
+[global]
+  checkNewVersion = true
+  sendAnonymousUsage = true
+
+[log]
+  level = "DEBUG"
+
+[api]
+  dashboard = true
+  insecure = true
+
 [entryPoints]
   [entryPoints.http]
-  address = ":8080"
-#    [entryPoints.http.redirect]
-#    entryPoint = "https"
+  address = ":8081"
   [entryPoints.https]
   address = ":8443"
-#    [entryPoints.https.tls]
+##  [entryPoints.https.tls]
+
 [acme]
-email = "letsencrypt@example.com"
+email = "marouene.arfaoui@sofrecom.com"
 storage = "/etc/letsencrypt/acme.json"
 entryPoint = "https"
-onDemand = false
+[acme.httpChallenge]
+  entryPoint = "http"
 OnHostRule = true
+#[[acme.domains]]
+#  main = "serv1.idpc.com"
+#[[acme.domains]]
+#  main = "www.idpc.com"
