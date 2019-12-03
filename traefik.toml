@@ -4,11 +4,11 @@ address = ":8081"
 [entryPoints]
   [entryPoints.http]
   address = ":8080"
-    [entryPoints.http.redirect]
-    entryPoint = "https"
+#    [entryPoints.http.redirect]
+#    entryPoint = "https"
   [entryPoints.https]
   address = ":8443"
-    [entryPoints.https.tls]
+#    [entryPoints.https.tls]
 [acme]
 email = "letsencrypt@example.com"
 storage = "/etc/letsencrypt/acme.json"
