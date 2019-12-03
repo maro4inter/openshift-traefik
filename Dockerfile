@@ -11,13 +11,18 @@ RUN set -ex; \
 	wget --quiet -O /usr/local/bin/traefik "https://github.com/containous/traefik/releases/download/v1.7.19/traefik_linux-$arch"; \
 	chmod +x /usr/local/bin/traefik
 
-USER 1001
-VOLUME /etc/traefik /etc/letsencrypt
-COPY entrypoint.sh /
+COPY entrypoint.sh /entrypoint.sh
+
 RUN set -ex; \
 	chmod +x /entrypoint.sh ; \
 	chown 1001:1001 entrypoint.sh
-EXPOSE 8080 8081 8443
+
+VOLUME /etc/traefik /etc/letsencrypt
+
+EXPOSE 8080 8443 8081
+
+USER 1001
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/local/bin/traefik","--configfile /etc/traefik/traefik.toml"]
 
