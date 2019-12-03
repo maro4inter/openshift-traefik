@@ -10,14 +10,13 @@ RUN set -ex; \
 	esac; \
 	wget --quiet -O /usr/local/bin/traefik "https://github.com/containous/traefik/releases/download/v1.7.19/traefik_linux-$arch"; \
 	chmod +x /usr/local/bin/traefik
-COPY entrypoint.sh /
-RUN set -ex; \
-	chmod +x /entrypoint.sh ; \
-	chown 1001:1001 entrypoint.sh
-	
-USER 1001
-EXPOSE 8080 8081 8443
 
+USER 1001
+COPY entrypoint.sh /
+#RUN set -ex; \
+#	chmod +x /entrypoint.sh ; \
+#	chown 1001:1001 entrypoint.sh
+EXPOSE 8080 8081 8443
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["traefik","--defaultentrypoints=http,https","--entryPoints='Name:http Address::8080'","--entryPoints='Name:https Address::8443 TLS'","--entrypoints.web.address=:8081"]
 
