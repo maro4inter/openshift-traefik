@@ -1,0 +1,278 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: traefik
+  annotations:
+    openshift.io/display-name: "Treafik - The Cloud Native Edge Router (Ephemeral)" 
+    description: >-
+      An open-source reverse proxy and load balancer for HTTP and TCP-based applications that is easy, dynamic, automatic, fast, full-featured, production proven, provides metrics, and integrates with every major cluster technology... No wonder it's so popular!
+
+      WARNING: Any data stored will be lost upon pod destruction. Only use this template for testing. 
+    openshift.io/long-description: >-
+      Traefik is an open-source Edge Router that makes publishing your services a fun and easy experience. It receives requests on behalf of your system and finds out which components are responsible for handling them.
+
+      What sets Traefik apart, besides its many features, is that it automatically discovers the right configuration for your services. The magic happens when Traefik inspects your infrastructure, where it finds relevant information and discovers which service serves which request.
+
+      Traefik is natively compliant with every major cluster technology, such as Kubernetes, Docker, Docker Swarm, AWS, Mesos, Marathon, and the list goes on; and can handle many at the same time. (It even works for legacy software running on bare metal.)
+
+      With Traefik, there is no need to maintain and synchronize a separate configuration file: everything happens automatically, in real time (no restarts, no connection interruptions). With Traefik, you spend time developing and deploying new features to your system, not on configuring and maintaining its working state.
+
+      Developing Traefik, our main goal is to make it simple to use, and we're sure you'll enjoy it.
+    tags: "traefik,reverse proxy,router,services,edge,mutual tls,https tls,endpoints,providers,middlewares,load balancer,health checks,gRPC" 
+    openshift.io/provider-display-name: "Containous" 
+    openshift.io/documentation-url: "https://docs.traefik.io/" 
+    openshift.io/support-url: "https://containo.us/" 
+message: "Template Author: ARFAOUI Marouene <marouene.arfaoui@sofrecom.com>" 
+objects:
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: traefik
+      component: traefik-server
+    name: traefik
+  spec:
+    replicas: 1
+    selector:
+      app: traefik
+      component: traefik-server
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 300
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: traefik
+          component: traefik-server
+      spec:
+        containers:
+        - image: traefik
+          imagePullPolicy: Always
+          name: traefik
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8081
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256M
+            requests:
+              cpu: 100m
+              memory: 256M
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /etc/traefik
+            name: traefik-config-dir
+          - mountPath: /etc/letsencrypt
+            name: letsencrypt-config-dir
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+            - key: traefik.toml
+              path: traefik.toml
+            name: traefik-config
+          name: traefik-config-dir
+        - name: letsencrypt-config-dir
+          secret:
+            defaultMode: 420
+            items:
+            - key: acme.json
+              path: acme.json
+            secretName: letsencrypt-config
+    test: false
+    triggers:
+    - type: ConfigChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes the traefik server
+    creationTimestamp: null
+    labels:
+      app: traefik
+      component: service
+    name: traefik
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8081-tcp
+      port: 8081
+      protocol: TCP
+      targetPort: 8081
+    - name: 8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+    selector:
+      app: traefik
+      component: traefik-server
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: traefik
+      component: service
+    name: traefik
+  spec:
+    host: traefik-dipc-ext.kermit-noprod-b.itn.intraorange
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: traefik
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2019-12-03T14:41:16Z
+        status: "True"
+        type: Admitted
+      host: traefik-dipc-ext.kermit-noprod-b.itn.intraorange
+      routerName: router-gin
+      wildcardPolicy: None
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: traefik
+      component: service
+    name: traefik-pub
+  spec:
+    host: traefik-pub-dipc-ext.kermit-noprod-b.itn.intraorange
+    port:
+      targetPort: 8081-tcp
+    to:
+      kind: Service
+      name: traefik
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2019-12-03T14:42:00Z
+        status: "True"
+        type: Admitted
+      host: traefik-pub-dipc-ext.kermit-noprod-b.itn.intraorange
+      routerName: router-gin
+      wildcardPolicy: None
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: traefik
+      component: service
+    name: traefik-secure
+  spec:
+    host: traefik-secure-dipc-ext.kermit-noprod-b.itn.intraorange
+    port:
+      targetPort: 8443-tcp
+    to:
+      kind: Service
+      name: traefik
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2019-12-03T15:01:58Z
+        status: "True"
+        type: Admitted
+      host: traefik-secure-dipc-ext.kermit-noprod-b.itn.intraorange
+      routerName: router-gin
+      wildcardPolicy: None
+- apiVersion: v1
+  data:
+    traefik.toml: |-
+      defaultEntryPoints = ["https","http"]
+
+      [global]
+        checkNewVersion = true
+        sendAnonymousUsage = true
+
+      [log]
+        level = "DEBUG"
+
+      [entryPoints]
+        [entryPoints.http]
+        address = ":8081"
+        [entryPoints.https]
+        address = ":8443"
+      ##  [entryPoints.https.tls]
+
+      [api]
+        dashboard = true
+        insecure = true
+     
+      [acme]
+      email = "marouene.arfaoui@sofrecom.com"
+      storage = "/etc/letsencrypt/acme.json"
+      entryPoint = "https"
+      [acme.httpChallenge]
+        entryPoint = "http"
+      OnHostRule = true
+      #[[acme.domains]]
+      #  main = "serv1.idpc.com"
+      #[[acme.domains]]
+      #  main = "www.idpc.com"
+  kind: ConfigMap
+  metadata:
+    name: traefik-config
+    namespace: dipc-ext
+- apiVersion: v1
+  data:
+    acme.json: null
+  kind: Secret
+  metadata:
+    name: letsencrypt-config
+    namespace: dipc-ext
+  type: Opaque
